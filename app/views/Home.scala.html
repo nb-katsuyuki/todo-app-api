@@ -4,10 +4,32 @@
 *
 *@
 
-@(vv: model.ViewValueCommon)
+@*
+* データモデルをViewに渡すのは本当は良くないよ
+*@
+@import lib.model.Todo
+@import lib.model.TodoCategory
+
+@(vv: model.ViewValueHome,todos:Seq[Todo],categorys:Seq[TodoCategory],debug:Any = None)
 @common.Default(vv){
+<h2>カテゴリー一覧</h2>
 <ul>
-   <li><a>カテゴリー一覧</a></li>
-   <li><a>Todo一覧</a></li>
+      @for(category <- categorys){ <li class="@category.color.className"><a href="category/@category.id">
+                  <div>@category.name (@category.slug)</div>
+            </a></li>}
 </ul>
+<h2>Todo一覧</h2>
+<ul>
+      @for(todo <- todos){
+           @for(category <- categorys.find(_.id.getOrElse(0) == todo.categoryId)){
+            <li class="@category.color.className"><a href="todo/@todo.id">
+                  <div>@todo.title</div>
+                  <div>@todo.body</div>
+                  <div>@todo.state.name</div>
+                  <div>@category.name</div>
+            </a></li>
+            }
+      }
+</ul>
+<code>@debug</code>
 }

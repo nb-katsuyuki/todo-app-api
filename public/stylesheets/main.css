@@ -43,3 +43,14 @@ body {
 .info {
   display: none;
 }
+
+/*** todo status color ***/
+.front {
+  background-color:#FAA;
+}
+.back {
+  background-color:#AFA;
+}
+.infra {
+  background-color:#AAF;
+}

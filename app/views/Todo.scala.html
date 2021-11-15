@@ -1,0 +1,28 @@
+@*
+*
+* to do sample project
+*
+*@
+
+@*
+* データモデルをViewに渡すのは本当は良くないよ
+*@
+@import lib.model.Todo
+@import lib.model.TodoCategory
+
+@(vv: model.ViewValueHome,todo:Todo,categorys:Seq[TodoCategory],debug:Any = None)
+@common.Default(vv){
+<form action="/todo" method="get">
+      <!-- <input type="hidden" name="csrf" value="csrf"> -->
+      <!-- <input name="id" type="hidden" value="@todo.id" /> -->
+      <p><label>Title</label><input name="title" type="text" value="@todo.title" /></p>
+      <p><label>body</label><textarea name="body">@todo.body</textarea></p>
+      <p><label>Category</label>
+            <select name="categoryId">
+                  @for(category <- categorys){ <option value="@category.id"
+                        @if(category.id==todo.categoryId){selected}>@category.name</option> }
+            </select>
+      </p>
+      <p><input type="submit" value="add"><input type="reset" value="reset"></p>
+</form>
+}

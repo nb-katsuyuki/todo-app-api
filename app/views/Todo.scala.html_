@@ -1,0 +1,33 @@
+@*
+*
+* to do sample project
+*
+*@
+
+@import lib.model.Todo
+@import lib.model.Category
+
+@(common:ViewValueHome,todo:Option[Todo],categorys:Seq[Category],debug:Any = None)
+@common.Default(vv){
+<h1>@imm</h1>
+<ul>
+      @for(item <- vv.todoList){ <li class="@item.category.slug"><a href="todo/@item.todo.id">
+                  <p>@item.todo.title</p>
+                  <p>@item.todo.body</p>
+                  <p>@item.todo.state.name</p>
+                  <p>@categorys.find(_.id == item.categoryId)</p>
+            </a></li>}
+</ul>
+<code>@debug</code>
+<form action="/todo/add" method="get" autocomplete="off">
+      <!-- <input type="hidden" name="csrf" value="@vv.csrf"> -->
+      <p><label>Title</label><input name="title" type="text" /></p>
+      <p><label>body</label><textarea name="body"></textarea></p>
+      <p><label>Category</label>
+            <select name="categoryId">
+                  @for(category <- categorys){ <option value="@category.id">@category.name</option> }
+            </select>
+      </p>
+      <p><input type="submit" value="add"><input type="reset" value="reset"></p>
+</form>
+}
