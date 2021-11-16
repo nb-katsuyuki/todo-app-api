@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 import Todo._
 case class Todo(
     id: Option[Id],
-    categoryId: Int, // @TODO とりあえず
+    categoryId: Option[TodoCategory.Id], // @TODO とりあえず
     title: String,
     body: Option[String],
     state: Status,
@@ -43,13 +43,12 @@ object Todo {
   // INSERT時のIDがAutoincrementのため,IDなしであることを示すオブジェクトに変換
   def apply(
       title: String,
-      body: Option[String],
-      state: Status
+      body: Option[String]
   ): WithNoId = {
     new Entity.WithNoId(
       new Todo(
         id = None,
-        categoryId = 0, // @TODO とりあえず
+        categoryId = None,
         title = title,
         body = body,
         state = Todo.Status.PENDING

@@ -21,7 +21,7 @@
 <h2>Todo一覧</h2>
 <ul>
       @for(todo <- todos){
-           @for(category <- categorys.find(_.id.getOrElse(0) == todo.categoryId)){
+           @for(category <- categorys.find(_.id == todo.categoryId)){
             <li class="@category.color.className"><a href="todo/@todo.id">
                   <div>@todo.title</div>
                   <div>@todo.body</div>
@@ -31,5 +31,6 @@
             }
       }
 </ul>
+<div><a href="todo/0">追加</a></div>
 <code>@debug</code>
 }

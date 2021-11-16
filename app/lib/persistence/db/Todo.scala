@@ -9,6 +9,7 @@ import slick.jdbc.JdbcProfile
 import ixias.persistence.model.Table
 
 import lib.model.Todo
+import lib.model.TodoCategory
 
 // UserTable: Userテーブルへのマッピングを行う
 //~~~~~~~~~~~~~~
@@ -34,7 +35,7 @@ case class TodoTable[P <: JdbcProfile]()(implicit val driver: P)
     import Todo._
     // Columns
     /* @1 */ def id         = column[Id]("id", O.UInt64, O.PrimaryKey, O.AutoInc)
-    /* @2 */ def categoryId = column[Int]("category_id", O.UInt64)
+    /* @2 */ def categoryId = column[TodoCategory.Id]("category_id", O.UInt64)
     /* @3 */ def title      = column[String]("title", O.Utf8Char255)
     /* @4 */ def body       = column[Option[String]]("body", O.Text)
     /* @5 */ def state      = column[Status]("state", O.UInt8)
@@ -43,7 +44,7 @@ case class TodoTable[P <: JdbcProfile]()(implicit val driver: P)
 
     type TableElementTuple = (
         Option[Id],
-        Int, // @TODO とりあえず
+        Option[TodoCategory.Id], // @TODO とりあえず
         String,
         Option[String],
         Status,
@@ -52,7 +53,7 @@ case class TodoTable[P <: JdbcProfile]()(implicit val driver: P)
     )
 
     // DB <=> Scala の相互のmapping定義
-    def * = (id.?, categoryId, title, body, state, updatedAt, createdAt) <> (
+    def * = (id.?, categoryId.?, title, body, state, updatedAt, createdAt) <> (
       // Tuple(table) => Model
       (t: TableElementTuple) =>
         Todo(
