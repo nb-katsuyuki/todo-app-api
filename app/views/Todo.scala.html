@@ -10,11 +10,11 @@
 @import lib.model.Todo
 @import lib.model.TodoCategory
 
-@(vv: model.ViewValueHome,todo:Todo,categorys:Seq[TodoCategory],debug:Any = None)
+@(vv: model.HomeView,todo:Todo,categorys:Seq[TodoCategory],debug:Any = None)
 @common.Default(vv){
-<form action="/todo" method="get">
+<form action="/todo" method="post">
       <!-- <input type="hidden" name="csrf" value="csrf"> -->
-      <!-- <input name="id" type="hidden" value="@todo.id" /> -->
+      <input name="id" type="hidden" value="@todo.id" />
       <p><label>Title</label><input name="title" type="text" value="@todo.title" /></p>
       <p><label>body</label><textarea name="body">@todo.body</textarea></p>
       <p><label>Category</label>
@@ -23,6 +23,6 @@
                         @if(category.id==todo.categoryId){selected}>@category.name</option> }
             </select>
       </p>
-      <p><input type="submit" value="add"><input type="reset" value="reset"></p>
+      <p><input type="submit" value="upsert"><input type="reset" value="reset"></p>
 </form>
 }

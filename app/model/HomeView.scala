@@ -7,8 +7,8 @@ package model
 import lib.model.Todo
 
 // Topページのviewvalue
-case class ViewValueHome(
+case class HomeView(
     title: String,
     cssSrc: Seq[String],
     jsSrc: Seq[String]
-) extends ViewValueCommon
+) extends CommonView

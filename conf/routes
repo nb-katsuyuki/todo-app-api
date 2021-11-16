@@ -11,8 +11,13 @@ GET     /                             controllers.HomeController.index
 # POST     /todo/add/                             controllers.TodoController.add
 # GET     /todo/add                             controllers.TodoController.add(title:String,body:Option[String],categoryId:Int)
 
+# todo Add @TODO CSRFの実装がわからないのでとりあえずGET
+# POST     /todo                              controllers.HomeController.upsert(id:Option[Long],title:String,body:String,categoryId:Long)
+GET     /todo/upsert                              controllers.HomeController.upsert(id:Option[Long],title:String,body:Option[String],categoryId:Long)
+
+
 # todo detail
-# GET     /todo/:id                             controllers.HomeController.detail(id:Int)
+GET     /todo/:id                             controllers.HomeController.detail(id:Long)
 
 # todo List
 # GET     /todo                             controllers.TodoController.index

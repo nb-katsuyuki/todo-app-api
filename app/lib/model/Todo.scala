@@ -13,14 +13,14 @@ import java.time.LocalDateTime
 //~~~~~~~~~~~~~~~~~~~~
 import Todo._
 case class Todo(
-    id: Option[Id],
-    categoryId: Option[TodoCategory.Id], // @TODO とりあえず
-    title: String,
-    body: Option[String],
-    state: Status,
-    updatedAt: LocalDateTime = NOW,
-    createdAt: LocalDateTime = NOW
-) extends EntityModel[Id]
+  id: Option[Id],
+  categoryId: Option[TodoCategory.Id], // @TODO とりあえず
+  title: String,
+  body: Option[String],
+  state: Status = Todo.Status.PENDING,
+  updatedAt: LocalDateTime = NOW,
+  createdAt: LocalDateTime = NOW)
+    extends EntityModel[Id]
 
 // コンパニオンオブジェクト
 //~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,7 +32,9 @@ object Todo {
 
   // ステータス定義
   //~~~~~~~~~~~~~~~~~
-  sealed abstract class Status(val code: Short, val name: String)
+  sealed abstract class Status(
+    val code: Short,
+    val name: String)
       extends EnumStatus
   object Status extends EnumStatus.Of[Status] {
     case object PENDING   extends Status(code = 0, name = "未着手")
@@ -42,17 +44,20 @@ object Todo {
 
   // INSERT時のIDがAutoincrementのため,IDなしであることを示すオブジェクトに変換
   def apply(
-      title: String,
-      body: Option[String]
+    title: String,
+    body: Option[String],
+    categoryId: Option[TodoCategory.Id]
   ): WithNoId = {
     new Entity.WithNoId(
       new Todo(
         id = None,
-        categoryId = None,
+        categoryId = categoryId,
         title = title,
-        body = body,
-        state = Todo.Status.PENDING
+        body = body
       )
     )
   }
+
+  def NoId(todo: Todo): WithNoId    = new Entity.WithNoId(todo)
+  def HasId(todo: Todo): EmbeddedId = new Entity.EmbeddedId(todo)
 }
