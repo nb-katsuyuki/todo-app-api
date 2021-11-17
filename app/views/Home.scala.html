@@ -14,9 +14,10 @@
 @common.Default(vv){
 <h2>カテゴリー一覧</h2>
 <ul>
-      @for(category <- categorys){ <li class="@category.color.className"><a href="category/@category.id">
-                  <div>@category.name (@category.slug)</div>
-            </a></li>}
+      @for(category <- categorys){
+            <li class="@category.color.className">
+                  <a href="category/@category.id"><div>@(category.name)(@category.slug)</div></a>
+            </li>}
 </ul>
 <h2>Todo一覧</h2>
 <ul>

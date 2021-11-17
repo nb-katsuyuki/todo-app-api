@@ -6,23 +6,11 @@
 # An example controller showing a sample home page
 GET     /                             controllers.HomeController.index
 
-
-# todo Add @TODO CSRFの実装がわからないのでとりあえずGET
-# POST     /todo/add/                             controllers.TodoController.add
-# GET     /todo/add                             controllers.TodoController.add(title:String,body:Option[String],categoryId:Int)
-
-# todo Add @TODO CSRFの実装がわからないのでとりあえずGET
-# POST     /todo                              controllers.HomeController.upsert(id:Option[Long],title:String,body:String,categoryId:Long)
-GET     /todo/upsert                              controllers.HomeController.upsert(id:Option[Long],title:String,body:Option[String],categoryId:Long)
-
+# todo upsert API化するときは分ける
+POST     /todo                              controllers.HomeController.upsert()
 
 # todo detail
 GET     /todo/:id                             controllers.HomeController.detail(id:Long)
 
-# todo List
-# GET     /todo                             controllers.TodoController.index
-
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
-
-

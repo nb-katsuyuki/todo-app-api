@@ -1,3 +1,4 @@
+
 @*
 *
 * to do sample project
@@ -6,23 +7,24 @@
 
 @*
 * データモデルをViewに渡すのは本当は良くないよ
-*@
+*@ 
+
 @import lib.model.Todo
 @import lib.model.TodoCategory
+@import helper._
 
-@(vv: model.HomeView,todo:Todo,categorys:Seq[TodoCategory],debug:Any = None)
+
+@(vv: model.HomeView,categorys:Seq[TodoCategory],todoForm:Form[Todo],debug:Any = None)(implicit request: RequestHeader, messagesProvider: MessagesProvider)
 @common.Default(vv){
-<form action="/todo" method="post">
-      <!-- <input type="hidden" name="csrf" value="csrf"> -->
-      <input name="id" type="hidden" value="@todo.id" />
-      <p><label>Title</label><input name="title" type="text" value="@todo.title" /></p>
-      <p><label>body</label><textarea name="body">@todo.body</textarea></p>
-      <p><label>Category</label>
-            <select name="categoryId">
-                  @for(category <- categorys){ <option value="@category.id"
-                        @if(category.id==todo.categoryId){selected}>@category.name</option> }
-            </select>
-      </p>
-      <p><input type="submit" value="upsert"><input type="reset" value="reset"></p>
-</form>
+      @form(action = routes.HomeController.upsert){
+      <fieldset>
+            @CSRF.formField
+            <input type="hidden" value="@todoForm("id").value" name="id">
+            @inputText(todoForm("title"))
+            @textarea(todoForm("body"))
+            @* select(todoForm("categoryId"),categorys.map(category => (category.id.get.toString,category.name))) *@
+            @select(todoForm("categoryId"),options = categorys.map(category => (category.id.get.toString,category.name)))
+      </fieldset>
+      <div><input type="submit" value="upsert"><input type="reset" value="reset"></div>
+      }
 }
