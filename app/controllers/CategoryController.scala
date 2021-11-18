@@ -32,16 +32,19 @@ class CategoryController @Inject() (cc: MessagesControllerComponents, langs: Lan
     mapping(
       "id"    -> optional(longNumber),
       "name"  -> nonEmptyText(maxLength = 255),
-      "slug"  -> nonEmptyText(maxLength = 64).verifying(pattern("""[a-z|A-Z]*""".r, error = "slug is [a-z A-Z]")),
-      "color" -> number
+      "slug"  -> nonEmptyText(maxLength = 64).verifying(pattern("""[a-z|A-Z|0-9]*""".r, error = "slug is [a-z A-Z 0-9]")),
+      // "color" -> shortNumber ↓こんな書き方もできるとのこと
+      "color" -> shortNumber.transform[Category.Color](Category.Color.apply, _.code)
     )((id, name, slug, color) =>
       Category(
         id = id.map(Category.Id(_)),
         name = name,
         slug = slug,
-        color = Category.Color(color.toShort)
+        // color = Category.Color(color.toShort)
+        color = color
       ) // form -> Instance
-    )((category: Category) => Some(category.id, category.name, category.slug, category.color.code) // Instance -> form
+    // )((category: Category) => Some(category.id, category.name, category.slug, category.color.code) // Instance -> form
+    )((category: Category) => Some(category.id, category.name, category.slug, category.color) // Instance -> form
     )
   )
 
@@ -68,8 +71,8 @@ class CategoryController @Inject() (cc: MessagesControllerComponents, langs: Lan
       },
       category => {
         val categoryFuture = category.id match {
-          case None => onMySQL.CategoryRepository.add(Category.NoId(category))     // IDがなければ新規
-          case _    => onMySQL.CategoryRepository.update(Category.HasId(category)) // IDがあれば更新
+          case None => onMySQL.CategoryRepository.add(category.toWithNoId)      // IDがなければ新規
+          case _    => onMySQL.CategoryRepository.update(category.toEmbeddedId) // IDがあれば更新
         }
 
         for {

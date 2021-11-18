@@ -53,8 +53,8 @@ object Category {
         color = color
       )
     )
-  }  
-  
+  }
+
   def Empty(): WithNoId = {
     new Entity.WithNoId(
       new Category(
@@ -65,6 +65,4 @@ object Category {
       )
     )
   }
-  def NoId(category: Category): WithNoId    = new Entity.WithNoId(category)
-  def HasId(category: Category): EmbeddedId = new Entity.EmbeddedId(category)
 }
