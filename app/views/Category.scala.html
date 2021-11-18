@@ -1,0 +1,27 @@
+@*
+* Category.scala.html
+*@
+
+@import lib.model.Category
+@import helper._
+
+@* Seq[(String,String)] <- ここは専用の型を定義したほうがいいかな *@
+
+@(vv: model.HomeView,categoryForm:Form[Category],colorSelect:Seq[(String,String)],debug:Any = None)(implicit request: RequestHeader, messagesProvider: MessagesProvider)
+@common.Default(vv){
+<div><p><a href="/">Home</a> > Category</p></div>
+@form(action = routes.CategoryController.upsert){ 
+<fieldset>
+      @CSRF.formField 
+      <input type="hidden" value="@categoryForm("id").value" name="id">
+      @inputText(categoryForm("name"))
+      @inputText(categoryForm("slug"))
+      @select(categoryForm("color"),options = colorSelect)
+</fieldset>
+<div><input type="submit" value="upsert"><input type="reset" value="reset"></div>
+}
+@if(!categoryForm("id").value.isEmpty){ 
+      @* 素直にフォーム分けておいたほうがきれいかな *@
+      <div><a href="/category-remove/@categoryForm("id").value">remove</a></div>
+}
+}     @* common.Default(vv) *@
