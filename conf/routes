@@ -9,13 +9,17 @@ GET     /                             controllers.HomeController.index
 # todo upsert API化するときは分ける
 POST     /todo                              controllers.HomeController.upsert()
 
-# todo delete
+# todo delete　※CSRFとかつけてないので、外部からでもガンガン消していける
 # DELETE     /todo/:id                             controllers.HomeController.remove(id:Long)
 GET     /todo-remove/:id                      controllers.HomeController.remove(id:Long)
 
 # todo detail
 GET     /todo/:id                             controllers.HomeController.detail(id:Long)
 
+
+GET     /category/:id                           controllers.CategoryController.detail(id:Long)
+POST    /category                           controllers.CategoryController.upsert()
+GET     /category-remove/:id                      controllers.CategoryController.remove(id:Long)
 
 
 # Map static resources from the /public folder to the /assets URL path

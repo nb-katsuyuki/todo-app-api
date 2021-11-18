@@ -31,9 +31,8 @@ object Category {
 
   // Color定義
   //~~~~~~~~~~~~~~~~~
-  sealed abstract class Color(val code: Short, val className: String)
-      extends EnumStatus
-  object Color extends EnumStatus.Of[Color] {
+  sealed abstract class Color(val code: Short, val className: String) extends EnumStatus
+  object Color                                                        extends EnumStatus.Of[Color] {
     case object FRONT   extends Color(code = 1, className = "front")
     case object BACK    extends Color(code = 2, className = "back")
     case object INFRA   extends Color(code = 3, className = "infra")
@@ -54,5 +53,18 @@ object Category {
         color = color
       )
     )
+  }  
+  
+  def Empty(): WithNoId = {
+    new Entity.WithNoId(
+      new Category(
+        id = None,
+        name = "",
+        slug = "",
+        color = Color.UNKNOWN
+      )
+    )
   }
+  def NoId(category: Category): WithNoId    = new Entity.WithNoId(category)
+  def HasId(category: Category): EmbeddedId = new Entity.EmbeddedId(category)
 }

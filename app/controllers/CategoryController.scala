@@ -31,8 +31,8 @@ class CategoryController @Inject() (cc: MessagesControllerComponents, langs: Lan
   val categoryForm = Form(
     mapping(
       "id"    -> optional(longNumber),
-      "name"  -> nonEmptyText,
-      "slug"  -> nonEmptyText,
+      "name"  -> nonEmptyText(maxLength = 255),
+      "slug"  -> nonEmptyText(maxLength = 64).verifying(pattern("""[a-z|A-Z]*""".r, error = "slug is [a-z A-Z]")),
       "color" -> number
     )((id, name, slug, color) =>
       Category(
@@ -40,8 +40,8 @@ class CategoryController @Inject() (cc: MessagesControllerComponents, langs: Lan
         name = name,
         slug = slug,
         color = Category.Color(color.toShort)
-      ) // form -> todo
-    )((category: Category) => Some(category.id, category.name, category.slug, category.color.code) // todo -> form
+      ) // form -> Instance
+    )((category: Category) => Some(category.id, category.name, category.slug, category.color.code) // Instance -> form
     )
   )
 
@@ -84,12 +84,16 @@ class CategoryController @Inject() (cc: MessagesControllerComponents, langs: Lan
 
   def remove(id: Long) = {
     Action.async { implicit req =>
+      // トランザクション開始...どうやるのだろう
+      val categoryId = Category.Id(id)
       for {
-        res <- onMySQL.CategoryRepository.remove(Category.Id(id))
+        _ <- onMySQL.CategoryRepository.remove(categoryId)
+        _ <- onMySQL.TodoRepository.removeByCategoryId(categoryId)
       } yield {
+        // コミット
         Redirect(routes.HomeController.index)
       }
-    // @TODO recover
+      // @TODO recover　ロールバック
     }
   } //   def remove(id: Long)
 } // class CateogryController
