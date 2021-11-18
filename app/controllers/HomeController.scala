@@ -10,7 +10,7 @@ import play.api.mvc._
 import model.HomeView
 
 import lib.model.Todo
-import lib.model.TodoCategory
+import lib.model.Category
 import lib.persistence.onMySQL
 
 import scala.concurrent.Future
@@ -45,7 +45,7 @@ class HomeController @Inject() (cc: MessagesControllerComponents, langs: Langs) 
           title = title,
           body = body,
           state = Todo.Status(state.toShort),
-          categoryId = Some(TodoCategory.Id(categoryId))
+          categoryId = Some(Category.Id(categoryId))
         )
     )( // todo -> form
       (todo: Todo) =>
@@ -63,8 +63,8 @@ class HomeController @Inject() (cc: MessagesControllerComponents, langs: Langs) 
     //  コントローラに処理を書くのは本当は良くないよ -> とりあえず研修ではアーキテクチャは考えない
     // onMySQLもきっと直接書かなくてもなんとかする方法があるのだろうな -> DI参照
     val todosFuture: Future[Seq[Todo]]             = onMySQL.TodoRepository.all
-    val categorysFuture: Future[Seq[TodoCategory]] =
-      onMySQL.TodoCategoryRepository.all
+    val categorysFuture: Future[Seq[Category]] =
+      onMySQL.CategoryRepository.all
 
     for {
       todos     <- todosFuture
@@ -82,7 +82,7 @@ class HomeController @Inject() (cc: MessagesControllerComponents, langs: Langs) 
 
   // TODO詳細
   def detail(id: Long) = Action.async { implicit req: MessagesRequest[AnyContent] =>
-    val categorysFuture: Future[Seq[TodoCategory]] = onMySQL.TodoCategoryRepository.all
+    val categorysFuture: Future[Seq[Category]] = onMySQL.CategoryRepository.all
     val todoOptFuture                              = onMySQL.TodoRepository.get(Todo.Id(id))
     for {
       todoOpt   <- todoOptFuture
@@ -101,7 +101,7 @@ class HomeController @Inject() (cc: MessagesControllerComponents, langs: Langs) 
     todoForm.bindFromRequest.fold(
       errors => {
         // @TOOD ここの処理はまとめたいな
-        val categorysFuture: Future[Seq[TodoCategory]] = onMySQL.TodoCategoryRepository.all
+        val categorysFuture: Future[Seq[Category]] = onMySQL.CategoryRepository.all
         for {
           categorys <- categorysFuture
           // @TODO recover

@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 import Todo._
 case class Todo(
   id: Option[Id],
-  categoryId: Option[TodoCategory.Id], // @TODO とりあえず
+  categoryId: Option[Category.Id], // @TODO とりあえず
   title: String,
   body: Option[String],
   state: Status = Todo.Status.PENDING,
@@ -46,7 +46,7 @@ object Todo {
   def apply(
     title: String,
     body: Option[String],
-    categoryId: Option[TodoCategory.Id]
+    categoryId: Option[Category.Id]
   ): WithNoId = {
     new Entity.WithNoId(
       new Todo(

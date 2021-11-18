@@ -8,12 +8,12 @@ import java.time.LocalDateTime
 import slick.jdbc.JdbcProfile
 import ixias.persistence.model.Table
 
-import lib.model.TodoCategory
+import lib.model.Category
 
 // UserTable: Userテーブルへのマッピングを行う
 //~~~~~~~~~~~~~~
-case class TodoCategoryTable[P <: JdbcProfile]()(implicit val driver: P)
-    extends Table[TodoCategory, P] {
+case class CategoryTable[P <: JdbcProfile]()(implicit val driver: P)
+    extends Table[Category, P] {
   import api._
 
   // Definition of DataSourceName
@@ -31,7 +31,7 @@ case class TodoCategoryTable[P <: JdbcProfile]()(implicit val driver: P)
   // Definition of Table
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   class Table(tag: Tag) extends BasicTable(tag, "to_do_category") {
-    import TodoCategory._
+    import Category._
     // Columns
     /* @1 */ def id        = column[Id]("id", O.UInt64, O.PrimaryKey, O.AutoInc)
     /* @2 */ def name      = column[String]("name", O.Utf8Char255)
@@ -53,7 +53,7 @@ case class TodoCategoryTable[P <: JdbcProfile]()(implicit val driver: P)
     def * = (id.?, name, slug, color, updatedAt, createdAt) <> (
       // Tuple(table) => Model
       (t: TableElementTuple) =>
-        TodoCategory(
+        Category(
           t._1,
           t._2,
           t._3,
@@ -63,7 +63,7 @@ case class TodoCategoryTable[P <: JdbcProfile]()(implicit val driver: P)
         ),
       // Model => Tuple(table)
       (v: TableElementType) =>
-        TodoCategory.unapply(v).map { t =>
+        Category.unapply(v).map { t =>
           (
             t._1,
             t._2,

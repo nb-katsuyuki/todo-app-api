@@ -11,8 +11,8 @@ import java.time.LocalDateTime
 
 // ユーザーを表すモデル
 //~~~~~~~~~~~~~~~~~~~~
-import TodoCategory._
-case class TodoCategory(
+import Category._
+case class Category(
     id: Option[Id],
     name: String,
     slug: String,
@@ -23,11 +23,11 @@ case class TodoCategory(
 
 // コンパニオンオブジェクト
 //~~~~~~~~~~~~~~~~~~~~~~~~
-object TodoCategory {
+object Category {
   val Id = the[Identity[Id]]
-  type Id         = Long @@ TodoCategory
-  type WithNoId   = Entity.WithNoId[Id, TodoCategory]
-  type EmbeddedId = Entity.EmbeddedId[Id, TodoCategory]
+  type Id         = Long @@ Category
+  type WithNoId   = Entity.WithNoId[Id, Category]
+  type EmbeddedId = Entity.EmbeddedId[Id, Category]
 
   // Color定義
   //~~~~~~~~~~~~~~~~~
@@ -47,7 +47,7 @@ object TodoCategory {
       color: Color
   ): WithNoId = {
     new Entity.WithNoId(
-      new TodoCategory(
+      new Category(
         id = None,
         name = name,
         slug = slug,
