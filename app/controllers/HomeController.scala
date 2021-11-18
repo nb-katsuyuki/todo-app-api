@@ -26,10 +26,7 @@ import play.api.data.Forms._
 import play.api.data.validation.Constraints._
 
 @Singleton
-class HomeController @Inject() (
-  cc: MessagesControllerComponents,
-  langs: Langs)
-    extends MessagesAbstractController(cc) {
+class HomeController @Inject() (cc: MessagesControllerComponents, langs: Langs) extends MessagesAbstractController(cc) {
 
   // val availableLangs: Seq[Lang] = langs.availables
   // val title: String = messagesApi("home.title")(lang)
@@ -39,17 +36,26 @@ class HomeController @Inject() (
       "id"         -> optional(longNumber),
       "title"      -> nonEmptyText,
       "body"       -> optional(text),
+      "state"      -> number,
       "categoryId" -> longNumber
     )( // form -> todo
-      (id, title, body, categoryId) =>
+      (id, title, body, state, categoryId) =>
         Todo(
           id = id.map(Todo.Id(_)),
           title = title,
           body = body,
+          state = Todo.Status(state.toShort),
           categoryId = Some(TodoCategory.Id(categoryId))
         )
     )( // todo -> form
-      (todo: Todo) => Some(todo.id, todo.title, todo.body, todo.categoryId.getOrElse(0): Long)
+      (todo: Todo) =>
+        Some(
+          todo.id,
+          todo.title,
+          todo.body,
+          todo.state.code,
+          todo.categoryId.getOrElse(0): Long
+        )
     )
   )
 
@@ -78,7 +84,6 @@ class HomeController @Inject() (
   // TODO詳細
   def detail(id: Long) =
     Action.async { implicit req: MessagesRequest[AnyContent] =>
-      val messages: Messages                         = req.messages
       val categorysFuture: Future[Seq[TodoCategory]] = onMySQL.TodoCategoryRepository.all
       val todoOptFuture                              = onMySQL.TodoRepository.get(Todo.Id(id))
       for {
@@ -86,13 +91,11 @@ class HomeController @Inject() (
         categorys <- categorysFuture
         // @TODO 取得失敗時動作　recover
       } yield {
-        val todo = todoOpt.getOrElse(Todo(title = "", body = None, categoryId = None))
-        val vv   = HomeView(
-          title = " Todo",
-          cssSrc = Seq("main.css"),
-          jsSrc = Seq("main.js")
-        )
-        Ok(views.html.Todo(vv, categorys, todoForm.fill(todo.v)))
+        val todo = todoOpt.getOrElse(Todo(title = "", body = None, categoryId = None)) // 新規or編集
+        val vv   = HomeView(title = "Todo", cssSrc = Seq("main.css"), jsSrc = Seq("main.js"))
+        val statusSelect: Seq[(String, String)]   = Todo.Status.values.map(s => (s.code.toString, s.name))
+        val categorySelect: Seq[(String, String)] = categorys.map(category => (category.id.get.toString, category.name))
+        Ok(views.html.Todo(vv, todoForm.fill(todo.v), statusSelect, categorySelect))
       }
     }
 
@@ -106,19 +109,16 @@ class HomeController @Inject() (
             categorys <- categorysFuture
             // @TODO recover
           } yield {
-            val vv = HomeView(
-              title = " Todo",
-              cssSrc = Seq("main.css"),
-              jsSrc = Seq("main.js")
-            )
-            BadRequest(views.html.Todo(vv, categorys, errors))
+            val vv = HomeView(title = "Todo", cssSrc = Seq("main.css"), jsSrc = Seq("main.js"))
+            val statusSelect: Seq[(String, String)]   = Todo.Status.values.map(s => (s.code.toString, s.name))
+            val categorySelect: Seq[(String, String)] = categorys.map(category => (category.id.get.toString, category.name))
+            BadRequest(views.html.Todo(vv, errors, statusSelect, categorySelect))
           }
         },
         todo => {
           val todoFuture = todo.id match {
             case None => onMySQL.TodoRepository.add(Todo.NoId(todo))     // IDがなければ新規
             case _    => onMySQL.TodoRepository.update(Todo.HasId(todo)) // IDがあれば更新
-
           }
           for {
             res <- todoFuture
