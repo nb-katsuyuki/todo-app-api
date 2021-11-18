@@ -15,20 +15,26 @@
 <h2>カテゴリー一覧</h2>
 <ul>
       @for(category <- categorys){
-            <li class="@category.color.className">
-                  <a href="category/@category.id"><div>@(category.name)(@category.slug)</div></a>
-            </li>}
+      <li class="@category.color.className">
+            <a href="category/@category.id">
+                  <div>@(category.name)(@category.slug)</div>
+            </a>
+      </li>
+}
 </ul>
 <h2>Todo一覧</h2>
 <ul>
-      @for(todo <- todos){
-           @for(category <- categorys.find(_.id == todo.categoryId)){
-            <li class="@category.color.className"><a href="todo/@todo.id">
-                  <div>@todo.title</div>
-                  <div>@todo.body</div>
-                  <div>@todo.state.name</div>
-                  <div>@category.name</div>
-            </a></li>
+      @for(todo <- todos){ 
+            @for(category <- categorys.find(_.id==todo.categoryId)){
+            <li class="@category.color.className">
+            <div><a href="todo/@todo.id">
+                        <div>@todo.title</div>
+                        <div>@todo.body</div>
+                        <div>@todo.state.name</div>
+                        <div>@category.name</div>
+                  </a></div>
+            <div><a href="/todo-remove/@todo.id">remove</a></div>
+            </li>
             }
       }
 </ul>

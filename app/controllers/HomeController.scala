@@ -59,74 +59,83 @@ class HomeController @Inject() (cc: MessagesControllerComponents, langs: Langs) 
     )
   )
 
-  def index() =
-    Action.async { implicit req: MessagesRequest[AnyContent] =>
-      //  コントローラに処理を書くのは本当は良くないよ -> とりあえず研修ではアーキテクチャは考えない
-      // onMySQLもきっと直接書かなくてもなんとかする方法があるのだろうな -> DI参照
-      val todosFuture: Future[Seq[Todo]]             = onMySQL.TodoRepository.all
-      val categorysFuture: Future[Seq[TodoCategory]] =
-        onMySQL.TodoCategoryRepository.all
+  def index() = Action.async { implicit req: MessagesRequest[AnyContent] =>
+    //  コントローラに処理を書くのは本当は良くないよ -> とりあえず研修ではアーキテクチャは考えない
+    // onMySQLもきっと直接書かなくてもなんとかする方法があるのだろうな -> DI参照
+    val todosFuture: Future[Seq[Todo]]             = onMySQL.TodoRepository.all
+    val categorysFuture: Future[Seq[TodoCategory]] =
+      onMySQL.TodoCategoryRepository.all
 
-      for {
-        todos     <- todosFuture
-        categorys <- categorysFuture
-      } yield {
-        val vv = HomeView(
-          title = "Home",
-          cssSrc = Seq("main.css"),
-          jsSrc = Seq("main.js")
-        )
+    for {
+      todos     <- todosFuture
+      categorys <- categorysFuture
+    } yield {
+      val vv = HomeView(
+        title = "Home",
+        cssSrc = Seq("main.css"),
+        jsSrc = Seq("main.js")
+      )
 
-        Ok(views.html.Home(vv, todos, categorys))
-      }
+      Ok(views.html.Home(vv, todos, categorys))
     }
+  }
 
   // TODO詳細
-  def detail(id: Long) =
-    Action.async { implicit req: MessagesRequest[AnyContent] =>
-      val categorysFuture: Future[Seq[TodoCategory]] = onMySQL.TodoCategoryRepository.all
-      val todoOptFuture                              = onMySQL.TodoRepository.get(Todo.Id(id))
-      for {
-        todoOpt   <- todoOptFuture
-        categorys <- categorysFuture
-        // @TODO 取得失敗時動作　recover
-      } yield {
-        val todo = todoOpt.getOrElse(Todo(title = "", body = None, categoryId = None)) // 新規or編集
-        val vv   = HomeView(title = "Todo", cssSrc = Seq("main.css"), jsSrc = Seq("main.js"))
-        val statusSelect: Seq[(String, String)]   = Todo.Status.values.map(s => (s.code.toString, s.name))
-        val categorySelect: Seq[(String, String)] = categorys.map(category => (category.id.get.toString, category.name))
-        Ok(views.html.Todo(vv, todoForm.fill(todo.v), statusSelect, categorySelect))
-      }
+  def detail(id: Long) = Action.async { implicit req: MessagesRequest[AnyContent] =>
+    val categorysFuture: Future[Seq[TodoCategory]] = onMySQL.TodoCategoryRepository.all
+    val todoOptFuture                              = onMySQL.TodoRepository.get(Todo.Id(id))
+    for {
+      todoOpt   <- todoOptFuture
+      categorys <- categorysFuture
+      // @TODO 取得失敗時動作　recover
+    } yield {
+      val todo = todoOpt.getOrElse(Todo(title = "", body = None, categoryId = None)) // 新規or編集
+      val vv   = HomeView(title = "Todo", cssSrc = Seq("main.css"), jsSrc = Seq("main.js"))
+      val statusSelect: Seq[(String, String)]   = Todo.Status.values.map(s => (s.code.toString, s.name))
+      val categorySelect: Seq[(String, String)] = categorys.map(category => (category.id.get.toString, category.name))
+      Ok(views.html.Todo(vv, todoForm.fill(todo.v), statusSelect, categorySelect))
     }
+  }
 
-  def upsert() =
-    Action.async { implicit req =>
-      todoForm.bindFromRequest.fold(
-        errors => {
-          // @TOOD ここの処理はまとめたいな
-          val categorysFuture: Future[Seq[TodoCategory]] = onMySQL.TodoCategoryRepository.all
-          for {
-            categorys <- categorysFuture
-            // @TODO recover
-          } yield {
-            val vv = HomeView(title = "Todo", cssSrc = Seq("main.css"), jsSrc = Seq("main.js"))
-            val statusSelect: Seq[(String, String)]   = Todo.Status.values.map(s => (s.code.toString, s.name))
-            val categorySelect: Seq[(String, String)] = categorys.map(category => (category.id.get.toString, category.name))
-            BadRequest(views.html.Todo(vv, errors, statusSelect, categorySelect))
-          }
-        },
-        todo => {
-          val todoFuture = todo.id match {
-            case None => onMySQL.TodoRepository.add(Todo.NoId(todo))     // IDがなければ新規
-            case _    => onMySQL.TodoRepository.update(Todo.HasId(todo)) // IDがあれば更新
-          }
-          for {
-            res <- todoFuture
-            // @TODO recover
-          } yield {
-            Redirect(routes.HomeController.index)
-          }
+  def upsert() = Action.async { implicit req =>
+    todoForm.bindFromRequest.fold(
+      errors => {
+        // @TOOD ここの処理はまとめたいな
+        val categorysFuture: Future[Seq[TodoCategory]] = onMySQL.TodoCategoryRepository.all
+        for {
+          categorys <- categorysFuture
+          // @TODO recover
+        } yield {
+          val vv = HomeView(title = "Todo", cssSrc = Seq("main.css"), jsSrc = Seq("main.js"))
+          val statusSelect: Seq[(String, String)]   = Todo.Status.values.map(s => (s.code.toString, s.name))
+          val categorySelect: Seq[(String, String)] =
+            categorys.map(category => (category.id.get.toString, category.name))
+          BadRequest(views.html.Todo(vv, errors, statusSelect, categorySelect))
         }
-      )
+      },
+      todo => {
+        val todoFuture = todo.id match {
+          case None => onMySQL.TodoRepository.add(Todo.NoId(todo))     // IDがなければ新規
+          case _    => onMySQL.TodoRepository.update(Todo.HasId(todo)) // IDがあれば更新
+        }
+        for {
+          res <- todoFuture
+        } yield {
+          Redirect(routes.HomeController.index)
+        }
+        // @TODO recover
+      }
+    )
+  } // def upsert
+
+  def remove(id: Long) = {
+    Action.async { implicit req =>
+      for {
+        res <- onMySQL.TodoRepository.remove(Todo.Id(id))
+      } yield {
+        Redirect(routes.HomeController.index)
+      }
+      // @TODO recover
     }
+  }
 }

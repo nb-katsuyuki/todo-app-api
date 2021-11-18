@@ -9,8 +9,14 @@ GET     /                             controllers.HomeController.index
 # todo upsert API化するときは分ける
 POST     /todo                              controllers.HomeController.upsert()
 
+# todo delete
+# DELETE     /todo/:id                             controllers.HomeController.remove(id:Long)
+GET     /todo-remove/:id                      controllers.HomeController.remove(id:Long)
+
 # todo detail
 GET     /todo/:id                             controllers.HomeController.detail(id:Long)
+
+
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
