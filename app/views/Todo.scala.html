@@ -16,13 +16,15 @@
 
 @(vv: model.HomeView,todoForm:Form[Todo],statusesSelect:Seq[(String,String)],categorySelect:Seq[(String,String)],debug:Any = None)(implicit request: RequestHeader, messagesProvider: MessagesProvider)
 @common.Default(vv){
+<div><p><a href="/">Home</a> > Todo</p></div>
 @form(action = routes.HomeController.upsert){
 <fieldset>
       @CSRF.formField
       <input type="hidden" value="@todoForm("id").value" name="id">
       @inputText(todoForm("title"))
       @textarea(todoForm("body"))
-      @if(None == todoForm("id").value){  // 素直にフォーム分けておいたほうがきれいかな
+      @if(None == todoForm("id").value){
+            @* 素直にフォーム分けておいたほうがきれいかな *@
             <input type="hidden" value="@todoForm("state").value" name="state">
       }else{
             @select(todoForm("state"),options = statusesSelect)
@@ -31,4 +33,9 @@
 </fieldset>
 <div><input type="submit" value="upsert"><input type="reset" value="reset"></div>
 }
+@if(!todoForm("id").value.isEmpty){ 
+      @* 素直にフォーム分けておいたほうがきれいかな *@
+      <div><a href="/todo-remove/@todoForm("id").value">remove</a></div>
+}
+
 }
