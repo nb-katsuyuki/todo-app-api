@@ -8,4 +8,3 @@ target
 .metals
 /RUNNING_PID
 docker/db/data/
-.scalafmt.conf
