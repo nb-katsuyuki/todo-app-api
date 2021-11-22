@@ -9,6 +9,8 @@ import ixias.util.EnumStatus
 
 import java.time.LocalDateTime
 
+import play.api.libs.json._
+
 // ユーザーを表すモデル
 //~~~~~~~~~~~~~~~~~~~~
 import Todo._
@@ -66,4 +68,15 @@ object Todo {
     )
   }
 
+  implicit val writes: Writes[Todo] = new Writes[Todo]{
+    def writes(todo:Todo) = Json.obj(
+      "id" -> JsNumber(todo.id.getOrElse(0L):Long),
+      "categoryId" -> JsNumber(todo.categoryId.getOrElse(0L):Long),
+      "title" -> todo.title,
+      "body" -> todo.body,
+      "state" -> todo.state.code,
+      "updatedAt" -> todo.updatedAt,
+      "createdAt" -> todo.createdAt
+    )
+  }
 }

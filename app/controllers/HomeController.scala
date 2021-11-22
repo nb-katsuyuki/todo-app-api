@@ -25,6 +25,9 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.data.validation.Constraints._
 
+
+import play.api.libs.json.Json
+
 @Singleton
 class HomeController @Inject() (cc: MessagesControllerComponents, langs: Langs) extends MessagesAbstractController(cc) {
 
@@ -76,7 +79,8 @@ class HomeController @Inject() (cc: MessagesControllerComponents, langs: Langs) 
         jsSrc = Seq("main.js")
       )
 
-      Ok(views.html.Home(vv, todos, categorys))
+      // Ok(views.html.Home(vv, todos, categorys))
+      Ok(Json.toJson(todos))
     }
   }
 
