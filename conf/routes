@@ -4,23 +4,41 @@
 # ~~~~
 
 # An example controller showing a sample home page
-GET     /                             controllers.HomeController.index
-
-# todo upsert API化するときは分ける
-POST     /todo                              controllers.HomeController.upsert()
-
-# todo delete　※CSRFとかつけてないので、外部からでもガンガン消していける
-# DELETE     /todo/:id                             controllers.HomeController.remove(id:Long)
-GET     /todo-remove/:id                      controllers.HomeController.remove(id:Long)
-
-# todo detail
-GET     /todo/:id                             controllers.HomeController.detail(id:Long)
-
-
-GET     /category/:id                           controllers.CategoryController.detail(id:Long)
-POST    /category                           controllers.CategoryController.upsert()
-GET     /category-remove/:id                      controllers.CategoryController.remove(id:Long)
-
+# GET     /                             controllers.HomeController.index
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+
+# api color
+GET     /api/category/color/:id                           controllers.CategoryController.colorDetail(id:Long)
+GET     /api/category/color/                           controllers.CategoryController.color()
+GET     /api/category/color                           controllers.CategoryController.color()
+
+
+# api category
+GET     /api/category/:id                           controllers.CategoryController.detail(id:Long)
++ nocsrf
+POST    /api/category/:id                           controllers.CategoryController.create(id:Long)
++ nocsrf
+PUT    /api/category/:id                           controllers.CategoryController.update(id:Long)
++ nocsrf
+DELETE    /api/category/:id                           controllers.CategoryController.delete(id:Long)
+GET     /api/category/                           controllers.CategoryController.index()
+GET     /api/category                           controllers.CategoryController.index()
+
+
+# api status
+GET     /api/todo/status/:id                           controllers.TodoController.statusDetail(id:Long)
+GET     /api/todo/status/                           controllers.TodoController.status()
+GET     /api/todo/status                           controllers.TodoController.status()
+
+# api todo
+GET     /api/todo/:id                           controllers.TodoController.detail(id:Long)
++ nocsrf
+POST    /api/todo/:id                           controllers.TodoController.create(id:Long)
++ nocsrf
+PUT    /api/todo/:id                           controllers.TodoController.update(id:Long)
++ nocsrf
+DELETE    /api/todo/:id                           controllers.CategoryController.delete(id:Long)
+GET     /api/todo/                           controllers.TodoController.index()
+GET     /api/todo                           controllers.TodoController.index()

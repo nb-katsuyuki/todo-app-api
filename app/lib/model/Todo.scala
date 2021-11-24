@@ -1,6 +1,5 @@
-/**
- * This is a sample of Todo Application.
- */
+/** This is a sample of Todo Application.
+  */
 
 package lib.model
 
@@ -15,13 +14,13 @@ import play.api.libs.json._
 //~~~~~~~~~~~~~~~~~~~~
 import Todo._
 case class Todo(
-    id: Option[Id],
+    id:         Option[Id],
     categoryId: Option[Category.Id], // @TODO とりあえず
-    title: String,
-    body: Option[String],
-    state: Status = Todo.Status.PENDING,
-    updatedAt: LocalDateTime = NOW,
-    createdAt: LocalDateTime = NOW
+    title:      String,
+    body:       Option[String],
+    state:      Status = Todo.Status.PENDING,
+    updatedAt:  LocalDateTime = NOW,
+    createdAt:  LocalDateTime = NOW
 ) extends EntityModel[Id]
 
 // コンパニオンオブジェクト
@@ -34,49 +33,57 @@ object Todo {
 
   // ステータス定義
   //~~~~~~~~~~~~~~~~~
-  sealed abstract class Status(val code: Short, val name: String) extends EnumStatus
-  object Status                                                   extends EnumStatus.Of[Status] {
+  sealed abstract class Status(val code: Short, val name: String)
+      extends EnumStatus
+  object Status extends EnumStatus.Of[Status] {
     case object PENDING   extends Status(code = 0, name = "未着手")
     case object RUNNING   extends Status(code = 1, name = "進行中")
     case object COMPLETED extends Status(code = 2, name = "完了")
+
+    implicit val writes: Writes[Status] = new Writes[Status] {
+      def writes(status: Status) = Json.obj(
+        "code" -> status.code,
+        "name" -> status.name
+      )
+    }
   }
 
   // INSERT時のIDがAutoincrementのため,IDなしであることを示すオブジェクトに変換
   def apply(
-      title: String,
-      body: Option[String],
+      title:      String,
+      body:       Option[String],
       categoryId: Option[Category.Id]
   ): WithNoId = {
     new Entity.WithNoId(
       new Todo(
-        id = None,
+        id         = None,
         categoryId = categoryId,
-        title = title,
-        body = body
+        title      = title,
+        body       = body
       )
     )
   }
 
-  def Empty(): WithNoId = {
+  def Empty(): WithNoId             = {
     new Entity.WithNoId(
       new Todo(
-        id = None,
-        title = "",
-        body = None,
+        id         = None,
+        title      = "",
+        body       = None,
         categoryId = None
       )
     )
   }
 
-  implicit val writes: Writes[Todo] = new Writes[Todo]{
-    def writes(todo:Todo) = Json.obj(
-      "id" -> JsNumber(todo.id.getOrElse(0L):Long),
-      "categoryId" -> JsNumber(todo.categoryId.getOrElse(0L):Long),
-      "title" -> todo.title,
-      "body" -> todo.body,
-      "state" -> todo.state.code,
-      "updatedAt" -> todo.updatedAt,
-      "createdAt" -> todo.createdAt
+  implicit val writes: Writes[Todo] = new Writes[Todo] {
+    def writes(todo: Todo) = Json.obj(
+      "id"         -> JsNumber(todo.id.getOrElse(0L): Long),
+      "categoryId" -> JsNumber(todo.categoryId.getOrElse(0L): Long),
+      "title"      -> todo.title,
+      "body"       -> todo.body,
+      "state"      -> todo.state.code,
+      "updatedAt"  -> todo.updatedAt,
+      "createdAt"  -> todo.createdAt
     )
   }
 }

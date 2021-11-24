@@ -3,6 +3,7 @@ package controllers
 import javax.inject._
 import play.api.mvc._
 
+import lib.model.Todo
 import lib.model.Category
 import lib.persistence.onMySQL
 
@@ -16,44 +17,43 @@ import play.api.libs.json._
 import json.reads._
 
 @Singleton
-class CategoryController @Inject() (
+class TodoController @Inject() (
     val controllerComponents: ControllerComponents
 ) extends BaseController {
-  def color() = Action.async {
+
+  def status() = Action.async {
     implicit req => //: MessagesRequest[AnyContent] =>
-      Future.successful(Ok(Json.toJson(Category.Color.values)))
+      Future.successful(Ok(Json.toJson(Todo.Status.values)))
   }
 
-  def colorDetail(id: Long) = Action.async {
+  def statusDetail(id: Long) = Action.async {
     implicit req => //: MessagesRequest[AnyContent] =>
-      val res = Category.Color.values
-        .find(_.code == id)
+      val res = Todo.Status.values.find(_.code == id)
       Future.successful(Ok(Json.toJson(res)))
   }
 
-  def index() = Action.async {
+  def index()          = Action.async {
     implicit req => //: MessagesRequest[AnyContent] =>
       for {
-        categorys <- onMySQL.CategoryRepository.all
+        todos <- onMySQL.TodoRepository.all
       } yield {
-        Ok(Json.toJson(categorys))
+        Ok(Json.toJson(todos))
       }
   }
-
   def detail(id: Long) = Action.async {
     implicit req => //: MessagesRequest[AnyContent] =>
-      val categoryOptFuture = onMySQL.CategoryRepository.get(Category.Id(id))
+      val todoOptFuture = onMySQL.TodoRepository.get(Todo.Id(id))
       for {
-        categoryOpt <- categoryOptFuture
+        todoOpt <- todoOptFuture
       } yield {
-        val res = categoryOpt.map(category => category.v)
+        val res = todoOpt.map(todo => todo.v)
         Ok(Json.toJson(res))
       }
   }
 
   def create(id: Long) = Action.async(parse.json) { implicit req =>
     req.body
-      .validate[JsValueCreateCategory]
+      .validate[JsValueCreateTodo]
       .fold(
         errors => {
           Future.successful(
@@ -66,15 +66,15 @@ class CategoryController @Inject() (
             )
           )
         },
-        jsValueCategory => {
-          val category = Category(
-            name  = jsValueCategory.name,
-            slug  = jsValueCategory.slug,
-            color = Category.Color(jsValueCategory.color)
+        jsValueTodo => {
+          val todo = Todo(
+            categoryId = Some(Category.Id(jsValueTodo.categoryId)),
+            title      = jsValueTodo.title,
+            body       = jsValueTodo.body
           )
 
           for {
-            res <- onMySQL.CategoryRepository.add(category)
+            res <- onMySQL.TodoRepository.add(todo)
           } yield {
             Ok(Json.obj("result" -> true, "id" -> res.toLong))
           }
@@ -84,7 +84,7 @@ class CategoryController @Inject() (
 
   def update(id: Long) = Action.async(parse.json) { implicit req =>
     req.body
-      .validate[JsValueEditCategory]
+      .validate[JsValueEditTodo]
       .fold(
         errors => {
           Future.successful(
@@ -97,33 +97,31 @@ class CategoryController @Inject() (
             )
           )
         },
-        jsValueCategory => {
-          val category = Category(
-            id    = Some(Category.Id(jsValueCategory.id)),
-            name  = jsValueCategory.name,
-            slug  = jsValueCategory.slug,
-            color = Category.Color(jsValueCategory.color)
+        jsValueTodo => {
+          val todo = Todo(
+            id         = Some(Todo.Id(jsValueTodo.id)),
+            categoryId = Some(Category.Id(jsValueTodo.categoryId)),
+            title      = jsValueTodo.title,
+            body       = jsValueTodo.body,
+            state      = Todo.Status(jsValueTodo.state)
           )
 
           for {
-            res <- onMySQL.CategoryRepository.update(category.toEmbeddedId)
+            res <- onMySQL.TodoRepository.update(todo.toEmbeddedId)
           } yield {
-            Ok(Json.obj("result" -> true, "id" -> jsValueCategory.id))
+            Ok(Json.obj("result" -> true, "id" -> jsValueTodo.id))
           }
         }
       )
   } // def update(id: Long)
 
   def delete(id: Long) = Action.async { implicit req =>
-    // トランザクション開始...どうやるのだろう
-    val categoryId     = Category.Id(id)
-    val removeTodos    = onMySQL.TodoRepository.removeByCategoryId(categoryId)
-    val removeCategory = onMySQL.CategoryRepository.remove(categoryId)
+    val todoId = Todo.Id(id)
     for {
-      _ <- removeTodos
-      _ <- removeCategory
+      _ <- onMySQL.TodoRepository.remove(todoId)
     } yield {
       Ok(Json.obj("result" -> true, "id" -> id))
     }
   } //   def remove(id: Long)
+
 } // class CateogryController
