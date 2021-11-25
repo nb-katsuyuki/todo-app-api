@@ -39,6 +39,6 @@ POST    /api/todo/:id                           controllers.TodoController.creat
 + nocsrf
 PUT    /api/todo/:id                           controllers.TodoController.update(id:Long)
 + nocsrf
-DELETE    /api/todo/:id                           controllers.CategoryController.delete(id:Long)
+DELETE    /api/todo/:id                           controllers.TodoController.delete(id:Long)
 GET     /api/todo/                           controllers.TodoController.index()
 GET     /api/todo                           controllers.TodoController.index()
